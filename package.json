@@ -1,0 +1,33 @@
+{
+  "name": "rssbot",
+  "version": "1.0.0",
+  "description": "Bot to subscribe to rss feeds",
+  "main": "build/main.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -w -p tsconfig.json",
+    "start": "bash -c '. token && nodemon build/main.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nik-Sch/RSSTelegramBot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Nik-Sch/RSSTelegramBot/issues"
+  },
+  "homepage": "https://github.com/Nik-Sch/RSSTelegramBot#readme",
+  "dependencies": {
+    "@types/delay": "^3.1.0",
+    "@types/xml2js": "^0.4.5",
+    "delay": "^4.3.0",
+    "nodemon": "^2.0.2",
+    "rss-parser": "^3.7.5",
+    "telegraf": "^3.36.0",
+    "typescript": "^3.7.5"
+  },
+  "nodemonConfig": {
+    "watch": "build"
+  }
+}
