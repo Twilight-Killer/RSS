@@ -25,12 +25,12 @@ interface IChannel {
 
 const channels: IChannel[] = JSON.parse(readFileSync('channels.json').toString());
 
-const bot = new Telegraf('process.env.BOT_TOKEN');
+const bot = new Telegraf(process.env.BOT_TOKEN || '');
 setInterval(async () => {
   for (const channel of channels) {
     const feed = await new Parser().parseURL(channel.rssUrl);
     if (channel.sentItems === undefined) { // first rss download after start
-      console.log('first');
+      console.log(`${DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss')}: first`);
       channel.sentItems = feed.items?.map(mapItem);
       return;
     }
@@ -38,7 +38,9 @@ setInterval(async () => {
       return;
     }
     const newItems = feed.items.filter(feedItem => !channel.sentItems?.find(channelItem => channelItem.link === feedItem.link)).map(mapItem);
-    console.log(`${DateTime.local()} new: ` + newItems.map(i => i.link + ', ') || 'none');
+    if (newItems.length > 0) {
+      console.log(`${DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss')} new: ` + newItems.map(i => i.link + ', ') || 'none');
+    }
     for (const item of newItems) {
       bot.telegram.sendMessage(channel.chatId, `${item.title}\n${item.link}`);
     }
@@ -47,8 +49,8 @@ setInterval(async () => {
   }
 }, 5000);
 
-bot.telegram.getMe().then(botInfo => {
-  bot.options.username = botInfo.username;
-});
-bot.start((ctx) => ctx.reply(`last 24 hours: ${channels.length}`));
+// bot.telegram.getMe().then(botInfo => {
+//   bot.options.username = botInfo.username;
+// });
+bot.start((ctx) => ctx.reply(`last 24 hours: ${channels[0].sentItems?.length}`));
 bot.launch();
