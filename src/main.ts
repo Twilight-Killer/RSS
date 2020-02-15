@@ -25,7 +25,7 @@ setInterval(async () => {
     }
     // console.log(feed.items.find((feedItem) => feedItem.guid === (channel.rssItems as any)[0].guid)?.link + '\n' + (channel.rssItems as any)[0].link);
     const newItems = channel.rssItems.filter(item => !feed.items?.find((feedItem) => feedItem.link === item.link));
-    console.log(`diff: ${newItems.length}`)
+    console.log(`${Date.now()} - diff: ${newItems.length}`)
     for (const item of newItems) {
       bot.telegram.sendMessage(channel.chatId, `${item.title}\n${item.link}`);
     }
@@ -38,6 +38,8 @@ bot.telegram.getMe().then(botInfo => {
   bot.options.username = botInfo.username;
 });
 bot.start((ctx) => ctx.reply('Hello!'));
+
+bot.start((ctx) => ctx.reply('Hi'));
 
 // bot.telegram.sendMessage('@zeitonlinerss', 'Hello World!');
 bot.launch();
