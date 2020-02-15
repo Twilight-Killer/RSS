@@ -49,13 +49,14 @@ setInterval(async () => {
     }
     for (const item of newItems) {
       const site = await (await fetch(item.link)).text();
-      const match = site.match(/id\s*=\s*"paywall"/); // don't send links with a paywall
+      const match = site.match(/id\s*=\s*"paywall"/g); // don't send links with a paywall
+
       if (match === null) {
         bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n${item.link}`, {parse_mode: 'Markdown'});
       }
     }
     channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours <= 24);
-    channel.sentItems.push(...newItems);
+    channel.sentItems.unshift(...newItems);
   }
 }, 5000);
 
