@@ -4,6 +4,8 @@ import Parser from 'rss-parser';
 import { readFileSync } from 'fs';
 import { DateTime, Duration } from 'luxon';
 import fetch from 'node-fetch';
+import * as htmlparser2 from 'htmlparser2';
+
 
 function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return typeof value !== 'undefined' && value !== null;
@@ -32,6 +34,37 @@ interface IChannel {
 
 const channels: IChannel[] = JSON.parse(readFileSync('channels.json').toString());
 
+const processItem = async (channel: IChannel, item: IItem) => {
+  let send = true;
+  let komplettAnsicht = false;
+  const parser = new htmlparser2.Parser({
+    onopentag: (name: string, attr: any) => {
+      if (attr['id'] === 'paywall') {
+        send = false;
+      }
+      if (typeof attr['class'] === 'string' && attr['class'].includes('article-toc')) {
+        komplettAnsicht = true;
+      }
+    }
+  });
+  parser.write(await (await fetch(item.link)).text());
+  if (!send) {
+    console.log('paywall');
+    return;
+  }
+  const link = komplettAnsicht ? item.link + '/komplettansicht' : item.link;
+  bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n\n${link}`, { parse_mode: 'Markdown' });
+  // console.log(`*${item.title}*\n${link}`);
+}
+
+// processItem(channels[0], {
+//   time: DateTime.local(),
+//   link: 'https://www.zeit.de/politik/deutschland/2020-02/jens-spahn-cdu-kanzlerkandidat-armin-laschet',
+//   title: 'Test123'
+// });
+
+
+
 const bot = new Telegraf(process.env.BOT_TOKEN || '');
 setInterval(async () => {
   for (const channel of channels) {
@@ -49,12 +82,7 @@ setInterval(async () => {
       console.log(`${DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss')} new: ` + newItems.map(i => i.link + ', ') || 'none');
     }
     for (const item of newItems) {
-      const site = await (await fetch(item.link)).text();
-      const match = site.match(/id\s*=\s*"paywall"/g); // don't send links with a paywall
-
-      if (match === null) {
-        bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n${item.link}`, {parse_mode: 'Markdown'});
-      }
+      processItem(channel, item);
     }
     channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours <= 24);
     channel.sentItems.unshift(...newItems);

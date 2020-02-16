@@ -20,10 +20,12 @@
   "homepage": "https://github.com/Nik-Sch/RSSTelegramBot#readme",
   "dependencies": {
     "@types/delay": "^3.1.0",
+    "@types/htmlparser2": "^3.10.1",
     "@types/luxon": "^1.21.0",
     "@types/node-fetch": "^2.5.4",
     "@types/xml2js": "^0.4.5",
     "delay": "^4.3.0",
+    "htmlparser2": "^4.0.0",
     "luxon": "^1.22.0",
     "node-fetch": "^2.6.0",
     "nodemon": "^2.0.2",
