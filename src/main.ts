@@ -3,6 +3,7 @@ import Telegraf from "telegraf";
 import Parser from 'rss-parser';
 import { readFileSync } from 'fs';
 import { DateTime, Duration } from 'luxon';
+import fetch from 'node-fetch';
 
 function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return typeof value !== 'undefined' && value !== null;
