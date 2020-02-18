@@ -67,6 +67,7 @@ const processItem = async (channel: IChannel, item: IItem) => {
 
 const bot = new Telegraf(process.env.BOT_TOKEN || '');
 setInterval(async () => {
+  // process.exit();
   for (const channel of channels) {
     const feed = await new Parser().parseURL(channel.rssUrl);
     if (channel.sentItems === undefined) { // first rss download after start
@@ -84,7 +85,7 @@ setInterval(async () => {
     for (const item of newItems) {
       processItem(channel, item);
     }
-    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours <= 24);
+    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -24);
     channel.sentItems.unshift(...newItems);
   }
 }, 5000);
