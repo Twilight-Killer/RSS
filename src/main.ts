@@ -6,7 +6,6 @@ import { DateTime, Duration } from 'luxon';
 import fetch from 'node-fetch';
 import * as htmlparser2 from 'htmlparser2';
 
-
 function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return typeof value !== 'undefined' && value !== null;
 }
@@ -40,16 +39,17 @@ const processItem = async (channel: IChannel, item: IItem) => {
   const parser = new htmlparser2.Parser({
     onopentag: (name: string, attr: any) => {
       if (attr['id'] === 'paywall') {
+        console.log('paywall');
         send = false;
       }
       if (typeof attr['class'] === 'string' && attr['class'].includes('article-toc')) {
+        console.log('komplettAnsicht');
         komplettAnsicht = true;
       }
     }
   });
   parser.write(await (await fetch(item.link)).text());
   if (!send) {
-    console.log('paywall');
     return;
   }
   const link = komplettAnsicht ? item.link + '/komplettansicht' : item.link;
@@ -59,7 +59,7 @@ const processItem = async (channel: IChannel, item: IItem) => {
 
 // processItem(channels[0], {
 //   time: DateTime.local(),
-//   link: 'https://www.zeit.de/politik/deutschland/2020-02/jens-spahn-cdu-kanzlerkandidat-armin-laschet',
+//   link: 'https://www.zeit.de/arbeit/2020-02/schlafstoerungen-ingo-fietze-schlaf-yoga-cbd-schlafforschung/komplettansicht',
 //   title: 'Test123'
 // });
 
