@@ -34,7 +34,7 @@ interface IChannel {
 const channels: IChannel[] = JSON.parse(readFileSync('channels.json').toString());
 
 const processItem = async (channel: IChannel, item: IItem) => {
-  let send = true;
+  let send = item.link.indexOf('shop.zeit') !== -1;
   let komplettAnsicht = false;
   const parser = new htmlparser2.Parser({
     onopentag: (name: string, attr: any) => {
