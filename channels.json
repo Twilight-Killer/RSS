@@ -2,5 +2,9 @@
   {
     "chatId": "@zeitonlinerss",
     "rssUrl": "http://newsfeed.zeit.de/index"
+  },
+  {
+    "chatId": "@berlinrss",
+    "rssUrl": "https://www.berlin.de/presse/pressemitteilungen/index/feed?searchtext=corona+coronavirus"
   }
 ]

@@ -34,7 +34,8 @@ interface IChannel {
 const channels: IChannel[] = JSON.parse(readFileSync('channels.json').toString());
 
 const processItem = async (channel: IChannel, item: IItem) => {
-  let send = item.link.indexOf('shop.zeit') !== -1;
+  // let send = item.link.indexOf('shop.zeit') !== -1;
+  let send = true;
   let komplettAnsicht = false;
   const parser = new htmlparser2.Parser({
     onopentag: (name: string, attr: any) => {
@@ -57,10 +58,10 @@ const processItem = async (channel: IChannel, item: IItem) => {
   // console.log(`*${item.title}*\n${link}`);
 }
 
-// processItem(channels[0], {
+// processItem(channels[1], {
 //   time: DateTime.local(),
-//   link: 'https://www.zeit.de/arbeit/2020-02/schlafstoerungen-ingo-fietze-schlaf-yoga-cbd-schlafforschung/komplettansicht',
-//   title: 'Test123'
+//   link: 'https://www.berlin.de/sen/gpg/service/presse/2020/pressemitteilung.909940.php',
+//   title: 'Coronavirus: Erster Patient verstorben'
 // });
 
 
