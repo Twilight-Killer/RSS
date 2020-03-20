@@ -13,6 +13,7 @@ function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
 interface IItem {
   time: DateTime;
   link: string;
+  categories?: string[];
   title: string;
 }
 const mapItem = (rssItem: Parser.Item): IItem | undefined => {
@@ -20,6 +21,7 @@ const mapItem = (rssItem: Parser.Item): IItem | undefined => {
     return {
       time: DateTime.local(),
       link: rssItem.link,
+      categories: rssItem.categories,
       title: rssItem.title
     }
   }
@@ -54,8 +56,9 @@ const processItem = async (channel: IChannel, item: IItem) => {
     return;
   }
   const link = komplettAnsicht ? item.link + '/komplettansicht' : item.link;
-  bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n\n${link}`, { parse_mode: 'Markdown' });
-  // console.log(`*${item.title}*\n${link}`);
+  const categories = item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '';
+  bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n_${categories}_\n\n${link}`, { parse_mode: 'Markdown' });
+  // console.log(`*${item.title}*\n_${categories}_\n${link}`);
 }
 
 // processItem(channels[1], {
