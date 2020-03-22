@@ -89,7 +89,7 @@ setInterval(async () => {
     for (const item of newItems) {
       processItem(channel, item);
     }
-    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -24);
+    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -72);
     channel.sentItems.unshift(...newItems);
   }
 }, 5000);
