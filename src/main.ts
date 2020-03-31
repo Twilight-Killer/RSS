@@ -34,38 +34,64 @@ interface IChannel {
 }
 
 const channels: IChannel[] = JSON.parse(readFileSync('channels.json').toString());
+const zeitFakecookie = {
+  headers: {
+    'cookie': 'zonconsent=Tue Mar 31 3021 21:49:12 GMT+0200 (Central European Summer Time)'
+  }
+};
 
-const processItem = async (channel: IChannel, item: IItem) => {
-  // let send = item.link.indexOf('shop.zeit') !== -1;
+const processZeit = async (channel: IChannel, item: IItem) => {
   let send = true;
   let komplettAnsicht = false;
+  let image = '';
   const parser = new htmlparser2.Parser({
     onopentag: (name: string, attr: any) => {
       if (attr['id'] === 'paywall') {
         console.log('paywall');
         send = false;
       }
-      if (typeof attr['class'] === 'string' && attr['class'].includes('article-toc')) {
+      if (typeof attr['class'] === 'string') {
+        if  (attr['class'].includes('article-toc')) {
         console.log('komplettAnsicht');
         komplettAnsicht = true;
+        }
+        if (attr['class'].includes('article__media-item') && typeof attr['src'] === 'string') {
+          image = attr['src'];
+        }
       }
     }
   });
-  parser.write(await (await fetch(item.link)).text());
+  parser.write(await (await fetch(item.link, zeitFakecookie)).text());
   if (!send) {
     return;
   }
   const link = komplettAnsicht ? item.link + '/komplettansicht' : item.link;
   const categories = item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '';
-  bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n_${categories}_\n\n${link}`, { parse_mode: 'Markdown' });
+  const text = `*${item.title}*\n_${categories}_\n\n${link}`;
+  if (image !== '') {
+    bot.telegram.sendPhoto(channel.chatId, image, {
+      caption: text,
+      parse_mode: 'Markdown'
+    });
+    console.log(image);
+  } else {
+    bot.telegram.sendMessage(channel.chatId, text, { parse_mode: 'Markdown' });
+  }
   // console.log(`*${item.title}*\n_${categories}_\n${link}`);
 }
 
-// processItem(channels[1], {
-//   time: DateTime.local(),
-//   link: 'https://www.berlin.de/sen/gpg/service/presse/2020/pressemitteilung.909940.php',
-//   title: 'Coronavirus: Erster Patient verstorben'
-// });
+const processItem = async (channel: IChannel, item: IItem) => {
+  const categories = item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '';
+  bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n_${categories}_\n\n${item.link}`, { parse_mode: 'Markdown' });
+}
+
+processZeit(channels[0], {
+  time: DateTime.local(),
+  link: 'https://www.zeit.de/politik/deutschland/2020-03/werteunion-ralf-hoecker-staatsanwaltschaft-ermittlungen-eingestellt',
+  title: 'WerteUnion: Ermittlungen wegen Höcker-Rücktritt eingestellt',
+  categories: ['Deutschland']
+});
+
 
 
 
@@ -87,7 +113,11 @@ setInterval(async () => {
       console.log(`${DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss')} new: ` + newItems.map(i => i.link + ', ') || 'none');
     }
     for (const item of newItems) {
-      processItem(channel, item);
+      if (channel.rssUrl === 'http://newsfeed.zeit.de/index') {
+        processZeit(channel, item);
+      } else {
+        processItem(channel, item);
+      }
     }
     channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -72);
     channel.sentItems.unshift(...newItems);
@@ -97,5 +127,5 @@ setInterval(async () => {
 bot.telegram.getMe().then(botInfo => {
   bot.options.username = botInfo.username;
 });
-bot.start((ctx) => ctx.reply(`last 24 hours: ${channels[0].sentItems?.length}`));
+bot.start((ctx) => ctx.reply(`last 72 hours: ${channels[0].sentItems?.length}`));
 bot.launch();
