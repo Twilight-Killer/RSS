@@ -85,12 +85,12 @@ const processItem = async (channel: IChannel, item: IItem) => {
   bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n_${categories}_\n\n${item.link}`, { parse_mode: 'Markdown' });
 }
 
-processZeit(channels[0], {
-  time: DateTime.local(),
-  link: 'https://www.zeit.de/politik/deutschland/2020-03/werteunion-ralf-hoecker-staatsanwaltschaft-ermittlungen-eingestellt',
-  title: 'WerteUnion: Ermittlungen wegen Höcker-Rücktritt eingestellt',
-  categories: ['Deutschland']
-});
+// processZeit(channels[0], {
+//   time: DateTime.local(),
+//   link: 'https://www.zeit.de/politik/deutschland/2020-03/werteunion-ralf-hoecker-staatsanwaltschaft-ermittlungen-eingestellt',
+//   title: 'WerteUnion: Ermittlungen wegen Höcker-Rücktritt eingestellt',
+//   categories: ['Deutschland']
+// });
 
 
 
