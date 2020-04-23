@@ -56,7 +56,7 @@ const processZeit = async (channel: IChannel, item: IItem) => {
         komplettAnsicht = true;
         }
         if (attr['class'].includes('article__media-item') && typeof attr['src'] === 'string') {
-          image = attr['src'];
+          // image = attr['src'];
         }
       }
     }
