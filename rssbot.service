@@ -1,12 +1,12 @@
 [Unit]
-Description=Rezeptbuch web service
+Description=RSSBot web service
 After=network.target
 
 [Service]
-ExecStart=npm run start
-User=pi
-Group=pi
-WorkingDirectory=/home/pi/RSSTelegramBot
+ExecStart=/home/niklas/dev/RSSTelegramBot/start.sh
+User=niklas
+Group=niklas
+WorkingDirectory=/home/niklas/dev/RSSTelegramBot
 PrivateTmp=true
 Restart=always
 

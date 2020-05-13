@@ -1,8 +1,7 @@
-import delay from 'delay';
 import Telegraf from "telegraf";
 import Parser from 'rss-parser';
 import { readFileSync } from 'fs';
-import { DateTime, Duration } from 'luxon';
+import { DateTime } from 'luxon';
 import fetch from 'node-fetch';
 import * as htmlparser2 from 'htmlparser2';
 
@@ -119,7 +118,7 @@ setInterval(async () => {
         processItem(channel, item);
       }
     }
-    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -72);
+    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -300);
     channel.sentItems.unshift(...newItems);
   }
 }, 5000);
@@ -127,5 +126,5 @@ setInterval(async () => {
 bot.telegram.getMe().then(botInfo => {
   bot.options.username = botInfo.username;
 });
-bot.start((ctx) => ctx.reply(`last 72 hours: ${channels[0].sentItems?.length}`));
+bot.start((ctx) => ctx.reply(`last 300 hours: ${channels[0].sentItems?.length}`));
 bot.launch();

@@ -21,17 +21,17 @@
   "dependencies": {
     "@types/delay": "^3.1.0",
     "@types/htmlparser2": "^3.10.1",
-    "@types/luxon": "^1.21.0",
-    "@types/node-fetch": "^2.5.4",
+    "@types/luxon": "^1.22.0",
+    "@types/node-fetch": "^2.5.6",
     "@types/xml2js": "^0.4.5",
     "delay": "^4.3.0",
     "htmlparser2": "^4.1.0",
-    "luxon": "^1.22.0",
+    "luxon": "^1.23.0",
     "node-fetch": "^2.6.0",
-    "nodemon": "^2.0.2",
-    "rss-parser": "^3.7.5",
-    "telegraf": "^3.36.0",
-    "typescript": "^3.7.5"
+    "nodemon": "^2.0.3",
+    "rss-parser": "^3.7.6",
+    "telegraf": "^3.37.0",
+    "typescript": "^3.8.3"
   },
   "nodemonConfig": {
     "watch": "build"
