@@ -14,6 +14,7 @@ interface IItem {
   link: string;
   categories?: string[];
   title: string;
+  description?: string;
 }
 const mapItem = (rssItem: Parser.Item): IItem | undefined => {
   if (rssItem.link && rssItem.title) {
@@ -39,48 +40,45 @@ const zeitFakecookie = {
   }
 };
 
+const escape = (str: string) => {
+  return str.replace(/([_*\[\]()~`>#+-=|{}.!])/g, '\\$1')
+}
+
 const processZeit = async (channel: IChannel, item: IItem) => {
   let send = true;
-  let komplettAnsicht = false;
-  let image = '';
-  const parser = new htmlparser2.Parser({
-    onopentag: (name: string, attr: any) => {
-      if (attr['id'] === 'paywall') {
-        console.log('paywall');
-        send = false;
-      }
-      if (typeof attr['class'] === 'string') {
-        if  (attr['class'].includes('article-toc')) {
-        console.log('komplettAnsicht');
-        komplettAnsicht = true;
-        }
-        if (attr['class'].includes('article__media-item') && typeof attr['src'] === 'string') {
-          // image = attr['src'];
-        }
-      }
-    }
-  });
-  parser.write(await (await fetch(item.link, zeitFakecookie)).text());
+  // const parser = new htmlparser2.Parser({
+  //   onopentag: (name: string, attr: any) => {
+  //     if (attr['id'] === 'paywall') {
+  //       console.log('paywall');
+  //       send = false;
+  //     }
+  //     if (typeof attr['class'] === 'string') {
+  //       console.log(attr['class']);
+  //       if (attr['class'].includes('article-toc')) {
+  //         console.log('komplettAnsicht');
+  //         komplettAnsicht = true;
+  //       }
+  //     }
+  //   }
+  // });
+  // parser.write(await (await fetch(item.link, zeitFakecookie)).text());
+  // console.log(await (await fetch(item.link, zeitFakecookie)).text());
+  const komplettLink = item.link.replace(/\?/, '/komplettansicht?');
+
+  let komplettAnsicht = (await fetch(komplettLink)).status !== 404;
   if (!send) {
     return;
   }
-  const link = komplettAnsicht ? item.link + '/komplettansicht' : item.link;
-  const categories = item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '';
-  if (categories === 'News') {
+  const link = (komplettAnsicht ? komplettLink : item.link).replace(/([\)\\])/g, '\\$1');
+  const categories = escape(item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '');
+  if (categories.includes('News')) {
     console.log('news discarded');
     return;
   }
-  const text = `*${item.title}*\n_${categories}_\n\n${link}`;
-  if (image !== '') {
-    bot.telegram.sendPhoto(channel.chatId, image, {
-      caption: text,
-      parse_mode: 'Markdown'
-    });
-    console.log(image);
-  } else {
-    bot.telegram.sendMessage(channel.chatId, text, { parse_mode: 'Markdown' });
-  }
-  // console.log(`*${item.title}*\n_${categories}_\n${link}`);
+  const linkText = escape(item.description || 'Link');
+  const text = `*${escape(item.title)}*\n_${categories}_\n\n[${linkText}](${link})`
+  // console.log(text);
+  bot.telegram.sendMessage(channel.chatId, text, { parse_mode: 'MarkdownV2' });
 }
 
 const processItem = async (channel: IChannel, item: IItem) => {
@@ -88,12 +86,15 @@ const processItem = async (channel: IChannel, item: IItem) => {
   bot.telegram.sendMessage(channel.chatId, `*${item.title}*\n_${categories}_\n\n${item.link}`, { parse_mode: 'Markdown' });
 }
 
-// processZeit(channels[0], {
-//   time: DateTime.local(),
-//   link: 'https://www.zeit.de/politik/deutschland/2020-03/werteunion-ralf-hoecker-staatsanwaltschaft-ermittlungen-eingestellt',
-//   title: 'WerteUnion: Ermittlungen wegen Höcker-Rücktritt eingestellt',
-//   categories: ['Deutschland']
-// });
+// setTimeout(() => {
+//   processZeit(channels[0], {
+//     time: DateTime.local(),
+//     link: 'https://www.zeit.de/kultur/literatur/2020-09/lola-randl-die-krone-der-schoepfung-corona-roman?wt_zmc=fix.int.zonaudev.rss.zeitde.zeitde.feed.link.x&utm_medium=fix&utm_source=rss_zonaudev_int&utm_campaign=zeitde&utm_content=zeitde_feed_link_x&utm_referrer=rss',
+//     title: 'Lola Randl: Zombie-Corona auf dem Lande',
+//     categories: ['Literatur'],
+//     description: 'Ein guter Roman zur virologischen Lage! Lola Randl schreibt in \"Die Krone der Schöpfung\" eine fröhlich hypochondrische Gegenwartsgeschichte über unsere neue Normalität.'
+//   });
+// }, 2000);
 
 
 
@@ -116,11 +117,13 @@ setInterval(async () => {
       console.log(`${DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss')} new: ` + newItems.map(i => i.link + ', ') || 'none');
     }
     for (const item of newItems) {
-      if (channel.rssUrl === 'http://newsfeed.zeit.de/index') {
-        processZeit(channel, item);
-      } else {
-        processItem(channel, item);
-      }
+      try {
+        if (channel.rssUrl === 'http://newsfeed.zeit.de/index') {
+          processZeit(channel, item);
+        } else {
+          processItem(channel, item);
+        }
+      } catch { }
     }
     channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -300);
     channel.sentItems.unshift(...newItems);
