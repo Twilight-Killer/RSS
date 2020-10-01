@@ -66,6 +66,10 @@ const processZeit = async (channel: IChannel, item: IItem) => {
   }
   const link = komplettAnsicht ? item.link + '/komplettansicht' : item.link;
   const categories = item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '';
+  if (categories === 'News') {
+    console.log('news discarded');
+    return;
+  }
   const text = `*${item.title}*\n_${categories}_\n\n${link}`;
   if (image !== '') {
     bot.telegram.sendPhoto(channel.chatId, image, {
