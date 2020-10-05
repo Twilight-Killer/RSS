@@ -63,20 +63,25 @@ const processZeit = async (channel: IChannel, item: IItem) => {
   // });
   // parser.write(await (await fetch(item.link, zeitFakecookie)).text());
   // console.log(await (await fetch(item.link, zeitFakecookie)).text());
-  const komplettLink = item.link.replace(/\?/, '/komplettansicht?');
+  const komplettLink = item.link.replace(/\?.*/, '/komplettansicht');
 
-  let komplettAnsicht = (await fetch(komplettLink)).status !== 404;
+  let komplettAnsicht = false;
+  // let komplettAnsicht = (await fetch(komplettLink)).status !== 404;
+
   if (!send) {
     return;
   }
-  const link = (komplettAnsicht ? komplettLink : item.link).replace(/([\)\\])/g, '\\$1');
+  const link = (komplettAnsicht ? komplettLink : item.link.replace(/\?.*/, ''));
+  // const link = (komplettAnsicht ? komplettLink : item.link.replace(/\?.*/, '')).replace(/([\)\\])/g, '\\$1');
+  console.log(komplettLink, komplettAnsicht);
   const categories = escape(item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '');
-  if (categories.includes('News')) {
+  if (categories.includes('News') || categories.includes('zett')) {
     console.log('news discarded');
     return;
   }
   const linkText = escape(item.description || 'Link');
-  const text = `*${escape(item.title)}*\n_${categories}_\n\n[${linkText}](${link})`
+  const text = `*${escape(item.title)}*\n_${categories}_\n\n${escape(link)}`;
+  // const text = `*${escape(item.title)}*\n_${categories}_\n\n[${linkText}](${link})`;
   // console.log(text);
   bot.telegram.sendMessage(channel.chatId, text, { parse_mode: 'MarkdownV2' });
 }
@@ -89,7 +94,7 @@ const processItem = async (channel: IChannel, item: IItem) => {
 // setTimeout(() => {
 //   processZeit(channels[0], {
 //     time: DateTime.local(),
-//     link: 'https://www.zeit.de/kultur/literatur/2020-09/lola-randl-die-krone-der-schoepfung-corona-roman?wt_zmc=fix.int.zonaudev.rss.zeitde.zeitde.feed.link.x&utm_medium=fix&utm_source=rss_zonaudev_int&utm_campaign=zeitde&utm_content=zeitde_feed_link_x&utm_referrer=rss',
+//     link: 'https://www.zeit.de/gesellschaft/zeitgeschehen/2020-10/nordrhein-westfalen-kindesmissbrauch-ermittlungen-cybercrime-nrw?wt_zmc=fix.int.zonaudev.rss.zeitde.zeitde.feed.link.x&utm_medium=fix&utm_source=rss_zonaudev_int&utm_campaign=zeitde&utm_content=zeitde_feed_link_x&utm_referrer=rss',
 //     title: 'Lola Randl: Zombie-Corona auf dem Lande',
 //     categories: ['Literatur'],
 //     description: 'Ein guter Roman zur virologischen Lage! Lola Randl schreibt in \"Die Krone der Schöpfung\" eine fröhlich hypochondrische Gegenwartsgeschichte über unsere neue Normalität.'
