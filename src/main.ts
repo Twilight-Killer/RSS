@@ -3,6 +3,8 @@ import Parser from 'rss-parser';
 import { readFileSync } from 'fs';
 import { DateTime } from 'luxon';
 
+const maxStoreTime = 300;
+
 function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
   return typeof value !== 'undefined' && value !== null;
 }
@@ -29,6 +31,7 @@ interface IChannel {
   chatId: string | number;
   rssUrl: string;
   sentItems: IItem[] | undefined;
+  startCount: number | undefined;
 }
 
 const channels: IChannel[] = JSON.parse(readFileSync('channels.json').toString());
@@ -66,10 +69,11 @@ setInterval(async () => {
     if (channel.sentItems === undefined) { // first rss download after start
       console.log(`${DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss')}: first`);
       channel.sentItems = feed.items?.map(mapItem).filter(notEmpty);
-      return;
+      channel.startCount = channel.sentItems?.length;
+      continue;
     }
     if (!channel.sentItems || !feed.items) {
-      return;
+      continue;
     }
     const newItems: IItem[] = feed.items.filter(feedItem => !channel.sentItems?.find(channelItem => channelItem.link === feedItem.link)).map(mapItem).filter(notEmpty);
     if (newItems.length > 0) {
@@ -80,7 +84,7 @@ setInterval(async () => {
         processItem(channel, item);
       } catch { }
     }
-    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -300);
+    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -maxStoreTime);
     channel.sentItems.unshift(...newItems);
   }
 }, 5000);
@@ -88,5 +92,16 @@ setInterval(async () => {
 bot.telegram.getMe().then(botInfo => {
   bot.options.username = botInfo.username;
 });
-bot.start((ctx) => ctx.reply(`last 300 hours: ${channels.map(c => c.sentItems?.length ?? 0).reduce((a, b) => a + b)}`));
+const startTime = DateTime.local();
+
+bot.start((ctx) => {
+  const ceiledDiffDays = Math.round(Math.min(-startTime.diffNow('days').days, maxStoreTime / 24) * 10) / 10;
+  const avg = (c: IChannel) => {
+    const ceiledDiffHours = Math.min(-startTime.diffNow('hours').hours, maxStoreTime);
+    const itemCount = (c.sentItems?.length ?? 0) - (c.startCount ?? 0);
+    return Math.round(itemCount / ceiledDiffHours * 24 * 100) / 100;
+  }
+
+  return ctx.reply(`avg/24h last ${ceiledDiffDays} days:\n${channels.map(c => `${c.chatId}: ${avg(c)}\n`).reduce((a, b) => a + b)}`);
+});
 bot.launch();
