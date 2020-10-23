@@ -6,5 +6,9 @@
   {
     "chatId": "@berlinrss",
     "rssUrl": "https://www.berlin.de/presse/pressemitteilungen/index/feed?searchtext=corona+coronavirus"
+  },
+  {
+    "chatId": "@tagesspiegelrss",
+    "rssUrl": "https://www.tagesspiegel.de/contentexport/feed/home"
   }
 ]
