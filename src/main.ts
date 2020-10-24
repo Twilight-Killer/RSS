@@ -12,6 +12,7 @@ function notEmpty<TValue>(value: TValue | null | undefined): value is TValue {
 interface IItem {
   time: DateTime;
   link: string;
+  guid?: string;
   categories?: string[];
   title: string;
   description?: string;
@@ -22,7 +23,8 @@ const mapItem = (rssItem: Parser.Item): IItem | undefined => {
       time: DateTime.local(),
       link: rssItem.link,
       categories: rssItem.categories,
-      title: rssItem.title
+      title: rssItem.title,
+      guid: rssItem.guid
     }
   }
   return undefined;
@@ -75,7 +77,7 @@ setInterval(async () => {
     if (!channel.sentItems || !feed.items) {
       continue;
     }
-    const newItems: IItem[] = feed.items.filter(feedItem => !channel.sentItems?.find(channelItem => channelItem.link === feedItem.link)).map(mapItem).filter(notEmpty);
+    const newItems: IItem[] = feed.items.filter(feedItem => !channel.sentItems?.find(channelItem => (channelItem.link === feedItem.link) || (feedItem.guid && channelItem.guid === feedItem.guid))).map(mapItem).filter(notEmpty);
     if (newItems.length > 0) {
       console.log(`${DateTime.local().toFormat('yyyy-LL-dd HH:mm:ss')} new: ` + newItems.map(i => i.link + ', ') || 'none');
     }
@@ -102,6 +104,6 @@ bot.start((ctx) => {
     return Math.round(itemCount / ceiledDiffHours * 24 * 100) / 100;
   }
 
-  return ctx.reply(`avg/24h last ${ceiledDiffDays} days:\n${channels.map(c => `${c.chatId}: ${avg(c)}\n`).reduce((a, b) => a + b)}`);
+  return ctx.reply(`avg/24h last ${ceiledDiffDays} days:\n${channels.map(c => `${c.chatId}: ${avg(c)} (${c.sentItems?.length ?? 0} - ${c.startCount ?? 0})\n`).reduce((a, b) => a + b)}`);
 });
 bot.launch();
