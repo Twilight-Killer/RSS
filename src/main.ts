@@ -42,15 +42,16 @@ const escape = (str: string) => {
   return str.replace(/([_*\[\]()~`>#+-=|{}.!])/g, '\\$1')
 }
 
-const processItem = async (channel: IChannel, item: IItem) => {
+const processItem = (channel: IChannel, item: IItem) => {
   const link = item.link.replace(/\?.*/, '');
   const categories = escape(item.categories ? item.categories?.reduce((old, current) => old + ', ' + current, '').substring(2) : '');
   if (categories.includes('News') || categories.includes('zett')) {
     console.log('news discarded');
-    return;
+    return false;
   }
   const text = `*${escape(item.title)}*\n_${categories}_\n\n${escape(link)}`;
   bot.telegram.sendMessage(channel.chatId, text, { parse_mode: 'MarkdownV2' });
+  return true;
 }
 
 // setTimeout(() => {
@@ -83,11 +84,15 @@ setInterval(async () => {
     }
     for (const item of newItems) {
       try {
-        processItem(channel, item);
-      } catch { }
+        if (processItem(channel, item)) {
+          channel.sentItems.unshift(item);
+        }
+      } catch (err) { 
+        console.error(err);
+      }
     }
-    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').hours >= -maxStoreTime);
-    channel.sentItems.unshift(...newItems);
+    channel.sentItems = channel.sentItems.filter((item) => item.time.diffNow('hours').negate().as('hours') <= maxStoreTime);
+    // channel.sentItems.unshift(...newItems);
   }
 }, 5000);
 
@@ -97,9 +102,9 @@ bot.telegram.getMe().then(botInfo => {
 const startTime = DateTime.local();
 
 bot.start((ctx) => {
-  const ceiledDiffDays = Math.round(Math.min(-startTime.diffNow('days').days, maxStoreTime / 24) * 10) / 10;
+  const ceiledDiffDays = Math.round(Math.min(startTime.diffNow().negate().as('days'), maxStoreTime / 24) * 10) / 10;
   const avg = (c: IChannel) => {
-    const ceiledDiffHours = Math.min(-startTime.diffNow('hours').hours, maxStoreTime);
+    const ceiledDiffHours = Math.min(startTime.diffNow().negate().as('hours'), maxStoreTime);
     const itemCount = (c.sentItems?.length ?? 0) - (c.startCount ?? 0);
     return Math.round(itemCount / ceiledDiffHours * 24 * 100) / 100;
   }
