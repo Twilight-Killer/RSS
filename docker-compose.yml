@@ -1,0 +1,8 @@
+version: '2.0'
+services:
+  app:
+    build: .
+    container_name: rssbot
+    restart: always
+    env_file:
+      - .env

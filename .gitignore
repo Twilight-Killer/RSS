@@ -1,4 +1,3 @@
 node_modules/
-token
 build/
-urls.json
+.env
