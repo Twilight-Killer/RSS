@@ -64,7 +64,7 @@ const processItem = (channel: IChannel, item: IItem) => {
 //   });
 // }, 2000);
 
-const bot = new Telegraf(process.env.BOT_TOKEN || '6233416358:AAHOscBmlEulftoKCsaPGcIlCwrh4QeTWoM');
+const bot = new Telegraf(process.env.BOT_TOKEN || '6233416358:AAF_q3IRIO74mJxYVLAJ0TRX6gvzLGr0mF0');
 setInterval(async () => {
   // process.exit();
   for (const channel of channels) {
