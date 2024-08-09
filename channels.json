@@ -1,14 +1,14 @@
 [
   {
-    "chatId": "@wel_welcome",
-    "rssUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCYNXX1lfLk8JChEIDL2XI6w"
+    "chatId": "@spam_prediction",
+    "rssUrl": "http://newsfeed.zeit.de/index"
   },
   {
-    "chatId": "@tikktukk",
-    "rssUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCRuZp9SemX0egu2LFGrkEjg"
+    "chatId": "@spam_prediction",
+    "rssUrl": "https://www.berlin.de/presse/pressemitteilungen/index/feed?searchtext=corona+coronavirus"
   },
   {
-    "chatId": "@skejult",
-    "rssUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCASg7YGGNAJ9saOZVeqVVuw"
+    "chatId": "@spam_prediction",
+    "rssUrl": "https://www.tagesspiegel.de/contentexport/feed/home"
   }
 ]
