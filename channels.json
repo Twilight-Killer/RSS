@@ -1,14 +1,14 @@
 [
   {
     "chatId": "@spam_prediction",
-    "rssUrl": "http://newsfeed.zeit.de/index"
+    "rssUrl": "https://myanimelist.net/news?_location=rss"
   },
   {
     "chatId": "@spam_prediction",
-    "rssUrl": "https://www.berlin.de/presse/pressemitteilungen/index/feed?searchtext=corona+coronavirus"
+    "rssUrl": "http://subsplease.org/rss"
   },
   {
     "chatId": "@spam_prediction",
-    "rssUrl": "https://www.tagesspiegel.de/contentexport/feed/home"
+    "rssUrl": "https://www.livechart.me/feeds/headlines"
   }
 ]
